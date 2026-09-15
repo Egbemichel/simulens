@@ -32,12 +32,15 @@ The current development priority is to get a single successful baseline simulati
    [`../data/raw/osm/mvogmbi_postecentrale_corridor.osm`](../data/raw/osm/mvogmbi_postecentrale_corridor.osm),
    with its derivation documented in
    [`../docs/methodology/corridor-osm-extraction.md`](../docs/methodology/corridor-osm-extraction.md).
-2. **SUMO network** — Not started. The OSM extract still needs to be
-   converted into a SUMO network (via `netconvert`, e.g.
-   `netconvert --osm-files data/raw/osm/mvogmbi_postecentrale_corridor.osm -o simulation/network/corridor.net.xml`),
-   then cleaned of import artifacts. The extraction methodology doc already
-   flags known gaps (sparse `lanes`/`maxspeed` tagging, near-absent traffic
-   signal/turn-restriction data) that this step will need to address.
+2. **SUMO network** — **Done (structurally).** The OSM extract has been
+   converted via `netconvert` into
+   [`network/mvogmbi_postecentrale_corridor.net.xml`](network/mvogmbi_postecentrale_corridor.net.xml)
+   (701 junctions, 692 real edges, 3,041 lanes) and loads successfully in
+   the SUMO engine. Full conversion process, exact command, warnings, and
+   known limitations (default lane/speed values on untagged ways, one lost
+   turn restriction, no signal timing) are documented in
+   [`network/README.md`](network/README.md). Network cleaning/calibration
+   against these gaps has not been done yet.
 3. **Vehicles / traffic demand** — Not started.
 4. **Successful baseline simulation** — Not started.
 
@@ -45,9 +48,12 @@ Only after this baseline exists and is working does scenario comparison (varying
 
 ## Status
 
-- `network/`, `routes/`, `scenarios/`, `configs/` are still empty — no
-  `.net.xml`, `.rou.xml`, or `.sumocfg` files exist yet, and no SUMO
-  conversion has been run (SUMO/`netconvert` is not yet installed in the
-  current development environment).
-- The real OSM source data these will be built from now exists (see above).
-  It has **not** been validated against observed traffic.
+- `network/` now contains a structurally valid SUMO network generated from
+  the real OSM extract (see [`network/README.md`](network/README.md) for
+  full detail). `routes/`, `scenarios/`, `configs/` are still empty — no
+  `.rou.xml` or `.sumocfg` files exist yet, and no traffic demand has been
+  defined.
+- SUMO (`eclipse-sumo` 1.27.1, via `pip install eclipse-sumo`) is installed
+  in the current development environment.
+- The network has **not** been calibrated or validated against observed
+  traffic, and has no signal timing or turn restrictions applied yet.
