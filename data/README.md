@@ -11,11 +11,11 @@ This directory holds all data used by SimuLens: geospatial road network data and
   [`../docs/methodology/corridor-osm-extraction.md`](../docs/methodology/corridor-osm-extraction.md)
   for how the boundary was derived and where the file came from). Will also
   hold raw traffic count sheets / speed / travel-time logs once obtained.
-- **`processed/`** — Data derived from `raw/` through a documented, reproducible process (e.g. a cleaned SUMO network, aggregated traffic counts, a calibrated demand file). Processed data should be regenerable from `raw/` via a script in `scripts/`, not hand-edited. Currently empty — no processing has been done yet.
+- **`processed/`** — Data derived from `raw/` (or generated) through a documented, reproducible process. Currently contains the output of the **Baseline Technical Smoke Test**: `baseline_smoke_test_tripinfo.xml` and `baseline_smoke_test_summary.xml`, produced by `scripts/run_baseline_smoke_test.sh` from **synthetic/provisional** demand — see [`../simulation/routes/README.md`](../simulation/routes/README.md). These are simulation outputs from randomly generated traffic, not observed data.
 
 ## Rules
 
-- **No fabricated data.** This directory must never contain invented coordinates, invented road geometry, invented intersections, or invented traffic counts. Every file here must trace back to a real source: OpenStreetMap for geometry, or an actual observation/measurement for traffic data.
+- **No fabricated data presented as real.** This directory must never contain invented coordinates, invented road geometry, invented intersections, or invented traffic counts presented as if they were real. Every *source* file here must trace back to an actual origin: OpenStreetMap for geometry, an actual observation/measurement for traffic data, or — for synthetic simulation inputs/outputs like the smoke-test files above — must be unambiguously labeled as synthetic and never cited as observed Yaoundé traffic.
 - **Processing must be reproducible.** Any transformation from `raw/` to `processed/` should be done by a script (kept in `scripts/`), not a manual, undocumented step, so the pipeline can be re-run and audited.
 - **Large or sensitive raw data need not be committed directly.** If a raw dataset is large or has licensing/privacy constraints, document how to obtain it (source, access method) rather than committing it as-is, and note that in this file when it applies.
 

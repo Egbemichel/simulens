@@ -157,10 +157,30 @@ currently has **zero enforced turn restrictions**, which does not match
 reality and will need to be re-added manually (or via a wider re-extraction)
 during network cleaning.
 
+## Pre-demand connectivity inspection
+
+Before generating any traffic demand, the network was checked for fatal,
+simulation-blocking connectivity problems (not just the local geometry
+warnings above):
+
+- **Whole-network connectivity**: restricting to the 576 edges that allow
+  `passenger` vehicles, a weakly-connected-component analysis (via
+  `sumolib`) found **exactly one component containing all 576 edges** — no
+  disconnected islands in the drivable network.
+- **Corridor routability**: using `sumolib`'s shortest-path search on the
+  actual directed network (i.e. respecting one-way streets), a route exists
+  in **both directions** between the edges nearest the two study endpoints:
+  - Mvog-Mbi → Poste Centrale: 30 edges, 1,463 m
+  - Poste Centrale → Mvog-Mbi: 28 edges, 1,416 m
+- **Engine load test** (see above): `sumo` itself loads the network without
+  error.
+
+No fatal issues were found. The network is connected and routable enough
+to support demand generation; the items in the warnings table above remain
+open for later network cleaning but did not block this step.
+
 ## What this conversion deliberately does not include
 
-- No traffic demand (vehicles, routes, flows) — none exists yet anywhere in
-  the repository.
 - No calibrated lane counts or speed limits — untagged ways use SUMO's
   generic per-class typemap defaults, not measured or Yaoundé-specific
   values.
@@ -171,10 +191,11 @@ during network cleaning.
 
 ## Next step
 
-Traffic demand definition (`simulation/routes/`) is the next milestone per
-the project's progression (OSM network → SUMO network → traffic demand →
-baseline simulation). Before that, the network-cleaning items above (lane
+Traffic demand now exists as a **synthetic technical smoke test** — see
+[`../routes/README.md`](../routes/README.md) and
+[`../configs/README.md`](../configs/README.md). It is explicitly not
+calibrated or observed data. The network-cleaning items above (lane
 counts, the lost turn restriction, the sharp-angle/intersecting-left-turn
-warnings) should be reviewed — see
+warnings) should be reviewed before any calibration work — see
 [`../../docs/PROJECT_STATUS.md`](../../docs/PROJECT_STATUS.md) for the
 up-to-date TODO ordering.
