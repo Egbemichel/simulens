@@ -32,43 +32,55 @@ The current development priority is to get a single successful baseline simulati
    [`../data/raw/osm/mvogmbi_postecentrale_corridor.osm`](../data/raw/osm/mvogmbi_postecentrale_corridor.osm),
    with its derivation documented in
    [`../docs/methodology/corridor-osm-extraction.md`](../docs/methodology/corridor-osm-extraction.md).
-2. **SUMO network** — **Done (structurally).** The OSM extract has been
-   converted via `netconvert` into
+2. **SUMO network** — **Done (structurally), plus a focused cleaning
+   pass.** The OSM extract has been converted via `netconvert` into
    [`network/mvogmbi_postecentrale_corridor.net.xml`](network/mvogmbi_postecentrale_corridor.net.xml)
-   (701 junctions, 692 real edges, 3,041 lanes) and loads successfully in
-   the SUMO engine. Full conversion process, exact command, warnings, and
-   known limitations (default lane/speed values on untagged ways, one lost
-   turn restriction, no signal timing) are documented in
-   [`network/README.md`](network/README.md). Network cleaning/calibration
-   against these gaps has not been done yet.
+   (667 junctions, 683 real edges, 3,008 lanes). A cleaning pass then
+   added a small, explicitly documented set of lane/speed tag values —
+   inferred from real OSM evidence where possible, labeled a provisional
+   assumption where not — and a geometry fix for corridor-critical
+   junction warnings. Full conversion process, exact command, warnings,
+   and the complete OBSERVED/OSM-DERIVED/ASSUMED/MODEL-DEFAULT breakdown
+   are documented in [`network/README.md`](network/README.md) and
+   [`../docs/methodology/network-cleaning.md`](../docs/methodology/network-cleaning.md).
+   This network is still **not** calibrated or validated.
 3. **Vehicles / traffic demand** — **Done (synthetic/provisional only).**
    [`routes/synthetic_smoke_test.rou.xml`](routes/synthetic_smoke_test.rou.xml)
    holds 258 randomly generated trips — see
    [`routes/README.md`](routes/README.md) for why this is explicitly not
    real or calibrated demand.
-4. **Successful baseline simulation** — **Done, as a technical smoke test.**
+4. **Successful baseline simulation** — **Done, as a technical smoke test,
+   rerun after network cleaning.**
    [`configs/baseline_smoke_test.sumocfg`](configs/baseline_smoke_test.sumocfg)
    runs the network + synthetic demand end to end: 258/258 vehicles
-   inserted, 237 completed their routes within the 1,800s window, 0
-   collisions, 0 teleports. See
-   [`configs/README.md`](configs/README.md). This confirms the pipeline
-   works technically — it is **not** a validated or calibrated traffic
-   model.
+   inserted, 233 completed their routes within the 1,800s window (237
+   before cleaning — fewer complete because the cleaning pass corrected an
+   unrealistically fast 100 km/h silent default down to a provisional 50
+   km/h on corridor/feeder roads, so trips now take longer; see the
+   network-cleaning doc's before/after table), 0 collisions, 0 teleports
+   both times. See [`configs/README.md`](configs/README.md). This confirms
+   the pipeline works technically — it is **not** a validated or
+   calibrated traffic model.
 
 Only after a *calibrated and validated* baseline exists does scenario comparison (varying lanes, signal timing, road condition, closures, demand, etc.) and analytics build on top of it.
 
 ## Status
 
-- `network/` contains a structurally valid SUMO network generated from the
-  real OSM extract (see [`network/README.md`](network/README.md), including
-  a pre-demand connectivity check: the full drivable network is one
-  connected component, and the corridor is routable in both directions).
-- `routes/` and `configs/` contain a synthetic-demand baseline smoke test
-  (see [`routes/README.md`](routes/README.md) and
+- `network/` contains a structurally valid, cleaned SUMO network generated
+  from the real OSM extract (see [`network/README.md`](network/README.md)
+  and [`../docs/methodology/network-cleaning.md`](../docs/methodology/network-cleaning.md)),
+  including a connectivity check re-verified after cleaning: the full
+  drivable network is one connected component, and the corridor is
+  routable in both directions.
+- `routes/` and `configs/` contain a synthetic-demand baseline smoke test,
+  rerun after network cleaning with identical parameters (see
+  [`routes/README.md`](routes/README.md) and
   [`configs/README.md`](configs/README.md)). `scenarios/` is still empty —
   scenario work has not started.
 - SUMO (`eclipse-sumo` 1.27.1, via `pip install eclipse-sumo`) and `pyproj`
   are installed in the current development environment.
 - Nothing in this directory has been calibrated or validated against
   observed traffic. The network still has no signal timing or turn
-  restrictions applied, and the demand is randomly generated, not real.
+  restrictions (none exist in the study area — see the network-cleaning
+  doc), several corridor lane gaps remain unresolved, and the corridor
+  speed value is a provisional assumption, not measured data.

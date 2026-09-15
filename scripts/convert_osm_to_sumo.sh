@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-# Converts the raw OSM corridor extract into a SUMO network using netconvert.
+# Converts the OSM corridor extract into a SUMO network using netconvert.
+#
+# Defaults to the CLEANED derived OSM file (data/processed/, produced by
+# scripts/patch_osm_tags.py from the untouched raw extract) rather than the
+# raw file directly -- see docs/methodology/network-cleaning.md for exactly
+# what that patch changes and why. Pass an explicit input path to build
+# from the raw file instead.
 #
 # Requires SUMO's netconvert on PATH (or SUMO_HOME set to a SUMO install
 # whose bin/ directory contains it). SUMO can be installed with:
@@ -10,7 +16,7 @@
 # Usage: scripts/convert_osm_to_sumo.sh [input.osm] [output.net.xml]
 set -euo pipefail
 
-IN="${1:-data/raw/osm/mvogmbi_postecentrale_corridor.osm}"
+IN="${1:-data/processed/mvogmbi_postecentrale_corridor_cleaned.osm}"
 OUT="${2:-simulation/network/mvogmbi_postecentrale_corridor.net.xml}"
 
 if ! command -v netconvert >/dev/null 2>&1; then
@@ -41,6 +47,12 @@ echo "Typemap: $TYPEMAP"
 # --geometry.remove   merge redundant intermediate shape nodes (lossless for topology)
 # --junctions.join    merge OSM's multi-node intersections into single logical junctions
 # --output.original-names / --output.street-names  keep OSM way/street names traceable in the output
+# --default.junctions.radius 10  wider default turning-radius geometry (up from SUMO's
+#   default ~4m) -- a purely geometric parameter, not a traffic-data assumption. Added
+#   during network cleaning specifically because several corridor/feeder junctions
+#   (e.g. the Rue 3.007 and Place d'Awae clusters) produced "intersecting left turns"
+#   and sharp-angle warnings at the default radius; see
+#   docs/methodology/network-cleaning.md for the before/after warning comparison.
 #
 # Deliberately NOT using osmBuild.py's default --tls.guess-signals / --tls.discard-simple
 # / --tls.join: those would add traffic-signal control at junctions that have no
@@ -52,6 +64,7 @@ netconvert \
   --type-files "$TYPEMAP" \
   --geometry.remove \
   --junctions.join \
+  --default.junctions.radius 10 \
   --output.original-names \
   --output.street-names \
   -o "$OUT"

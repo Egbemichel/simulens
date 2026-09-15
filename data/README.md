@@ -11,7 +11,9 @@ This directory holds all data used by SimuLens: geospatial road network data and
   [`../docs/methodology/corridor-osm-extraction.md`](../docs/methodology/corridor-osm-extraction.md)
   for how the boundary was derived and where the file came from). Will also
   hold raw traffic count sheets / speed / travel-time logs once obtained.
-- **`processed/`** — Data derived from `raw/` (or generated) through a documented, reproducible process. Currently contains the output of the **Baseline Technical Smoke Test**: `baseline_smoke_test_tripinfo.xml` and `baseline_smoke_test_summary.xml`, produced by `scripts/run_baseline_smoke_test.sh` from **synthetic/provisional** demand — see [`../simulation/routes/README.md`](../simulation/routes/README.md). These are simulation outputs from randomly generated traffic, not observed data.
+- **`processed/`** — Data derived from `raw/` (or generated) through a documented, reproducible process. Currently contains:
+  - `mvogmbi_postecentrale_corridor_cleaned.osm` — a derived copy of the raw OSM extract with a small, explicitly documented set of lane/speed tag additions, produced by `scripts/patch_osm_tags.py`. See [`../docs/methodology/network-cleaning.md`](../docs/methodology/network-cleaning.md) for every value added, its source, and which are OSM-inferred vs. provisional assumptions. The raw file itself is never modified.
+  - `baseline_smoke_test_tripinfo.xml` / `baseline_smoke_test_summary.xml` — output of the **Baseline Technical Smoke Test**, produced by `scripts/run_baseline_smoke_test.sh` from **synthetic/provisional** demand — see [`../simulation/routes/README.md`](../simulation/routes/README.md). These are simulation outputs from randomly generated traffic, not observed data.
 
 ## Rules
 
