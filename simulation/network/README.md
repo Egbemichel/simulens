@@ -7,16 +7,20 @@ real OSM extract, and the record of how it was produced.
 
 - **`mvogmbi_postecentrale_corridor.net.xml`** — the SUMO network, generated
   by `netconvert` from
-  [`../../data/raw/osm/mvogmbi_postecentrale_corridor.osm`](../../data/raw/osm/mvogmbi_postecentrale_corridor.osm).
-  This is a **structural** conversion only: no traffic demand, signal
-  timing, or calibration has been applied.
+  [`../../data/processed/mvogmbi_postecentrale_corridor_cleaned.osm`](../../data/processed/mvogmbi_postecentrale_corridor_cleaned.osm)
+  (a derived, documented copy of the raw extract with a small set of
+  explicit lane/speed tag additions — see
+  [`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md)
+  for exactly what was added and why). This is a **structural** conversion:
+  no traffic demand, signal timing, or calibration has been applied.
 - **`netconvert_warnings.txt`** — the full, unedited console output from the
-  conversion run (see below for a categorized summary).
+  current conversion run (see below for a categorized summary).
 
-The raw OSM file itself was **not modified** by this process — `netconvert`
-reads it and writes a separate network file; see `git log` on
+The raw OSM file itself was **not modified** by this or the cleaning
+process — see `git log` on
 `data/raw/osm/mvogmbi_postecentrale_corridor.osm` to confirm it is
-unchanged since acquisition.
+unchanged since acquisition. Tag additions were applied to a separate
+derived copy in `data/processed/`, never to the raw file.
 
 ## How to regenerate
 
@@ -42,14 +46,19 @@ needed or used.
 
 ```
 netconvert \
-  --osm-files data/raw/osm/mvogmbi_postecentrale_corridor.osm \
+  --osm-files data/processed/mvogmbi_postecentrale_corridor_cleaned.osm \
   --type-files <sumo-install>/data/typemap/osmNetconvert.typ.xml \
   --geometry.remove \
   --junctions.join \
+  --default.junctions.radius 10 \
   --output.original-names \
   --output.street-names \
   -o simulation/network/mvogmbi_postecentrale_corridor.net.xml
 ```
+
+(`--default.junctions.radius 10` was added during the network-cleaning
+pass — see [`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md)
+§3. It is a geometry parameter, not traffic data.)
 
 (Exact reproducible form: `scripts/convert_osm_to_sumo.sh`.)
 
@@ -99,63 +108,75 @@ The network was checked two ways:
    confirms the network file itself is structurally loadable by `sumo`, not
    that any traffic behaves correctly on it).
 
-### Structural counts
+### Structural counts (current, post-cleaning)
 
 | Element | Count |
 |---|---|
-| Junctions (total) | 701 |
-| — `priority` (real intersections) | 296 |
+| Junctions (total) | 667 |
+| — `priority` (real intersections) | 291 |
 | — `right_before_left` | 10 |
 | — `dead_end` | 16 |
 | — `rail_crossing` | 1 |
-| — `internal` (auto-generated) | 378 |
-| Edges (total) | 2,750 |
-| — normal (drivable/walkable) | 692 |
-| — internal (auto-generated intersection geometry) | 2,058 |
-| Lanes | 3,041 |
-| Connections | 4,050 |
+| — `internal` (auto-generated) | 349 |
+| Edges (total) | 2,707 |
+| — normal (drivable/walkable) | 683 |
+| — internal (auto-generated intersection geometry) | 2,024 |
+| Lanes | 3,008 |
+| Connections | 4,019 |
 | Traffic-light logics (`tlLogic`) | 0 |
 
-Zero `tlLogic` entries is expected, not an error: the only OSM
-`traffic_signals` node in the extract does not sit at a junction requiring
-one (likely a mid-block pedestrian-crossing signal), and signal-guessing was
-deliberately not enabled (see above). All 296 real intersections are
-currently controlled by SUMO's default priority / right-of-way rules,
-including the roundabouts (e.g. Place Ahmadou Ahidjo), which import as
-priority-controlled junctions per OSM's `junction=roundabout` tagging.
+(Counts shifted slightly from the initial conversion — see
+[`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md)
+§3 for why: the junction-radius geometry fix affects how `--junctions.join`
+clusters nearby nodes.)
 
-## Warnings from conversion (38 warning lines, categorized)
+Zero `tlLogic` entries is expected, not an error: **this study area
+contains zero OSM-tagged traffic signals** — the one
+`highway=traffic_signals` node in the raw extract turned out, on
+investigation, to be ~1km outside the study boundary (see the network-
+cleaning doc §5), and signal-guessing was deliberately not enabled (see
+above). All real intersections are currently controlled by SUMO's default
+priority / right-of-way rules, including the roundabouts (e.g. Place
+Ahmadou Ahidjo), which import as priority-controlled junctions per OSM's
+`junction=roundabout` tagging. Their true real-world control method is
+unverified and flagged for field checking.
 
-Full detail in [`netconvert_warnings.txt`](netconvert_warnings.txt). None of
-these blocked network generation; they are flagged here as things to
-revisit during network cleaning / calibration, not fixed silently:
+## Warnings from conversion
+
+Full detail in [`netconvert_warnings.txt`](netconvert_warnings.txt) (current,
+post-cleaning). A focused network-cleaning pass investigated which of
+these affect the main corridor/feeders versus purely residential
+geometry, and applied a geometry-only fix (`--default.junctions.radius
+10`) for the corridor-relevant ones — full before/after detail,
+including which warnings persisted, in
+[`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md)
+§3. Current categorized counts:
 
 | Count | Category | Notes |
 |---|---|---|
-| 24 | Connection speed reduced for tight turning radius | Automatic, geometry-based; expected at sharp junctions. Worth spot-checking the sharpest ones. |
-| 7 | Nearby junctions not merged despite `--junctions.join` | `netconvert` decided the geometry didn't warrant merging (parallel or long-edge cases); left as separate junctions. |
-| 7 | Sharp turn / acute-angle geometry at an edge segment | Reflects actual OSM node placement; may indicate an OSM digitizing quirk or a genuinely sharp real corner — not yet distinguished. |
-| 4 | Discarding unusable type (`waterway.*`) | Rivers/streams/canals/ditches inside the bbox — not roads, correctly excluded from the road network. |
-| 4 | Turn-restriction relation broken (see below) | The single mapped turn restriction in the extract references two ways that lie outside the extraction bounding box, so it could not be attached. |
-| 4 | Intersecting left turns at a junction | `netconvert`'s own suggestion is "increase junction radius" — a network-geometry refinement, not a data problem. |
-| 3 | Junction cluster reduced | Geometry cleanup of closely-spaced OSM nodes into a smaller cluster. |
-| 1 | Discarding unknown compound tag (`railway.rail\|usage.main`) | A rail edge with a tag combination not in the typemap; the way itself is still imported as a plain railway. |
-| 1 | Incomplete public-transport relation ignored | A PT route relation with no stops in this bbox — expected for a relation that extends beyond the extraction area. |
-| 1 | Rail crossing node with no connected road | OSM node `2163420596` is tagged as a rail crossing but has no road edge attached in this extract — likely the crossing road falls just outside the bbox or was filtered as non-drivable. |
-| 1 | Incomplete roundabout | Part of a roundabout's edge set (`608526512#0`) lies outside the bbox, so it's written as a partial roundabout. |
+| 8 | Connection speed reduced for tight turning radius | Automatic, geometry-based. |
+| 7 | Sharp turn / acute-angle geometry at an edge segment | One (`-1486879770#0`, Boulevard de l'OCAM) is corridor-relevant; see cleaning doc. |
+| 10 | Nearby junctions not merged despite `--junctions.join` | `netconvert` decided the geometry didn't warrant merging; informational. |
+| 5 | Junction cluster reduced | Geometry cleanup of closely-spaced OSM nodes into a smaller cluster. |
+| 4 | Discarding unusable type (`waterway.*`) | Rivers/streams/canals/ditches inside the bbox — not roads, correctly excluded. |
+| 4 | Turn-restriction relation broken (see below) | Investigated and confirmed genuinely outside the study area — not a bug. |
+| 3 | Intersecting left turns at a junction | 2 of 3 are corridor-critical and **remain unresolved** after the radius fix — see cleaning doc §3. |
+| 1 | Discarding unknown compound tag (`railway.rail\|usage.main`) | A rail edge with a tag combination not in the typemap. |
+| 1 | Incomplete public-transport relation ignored | A PT route relation with no stops in this bbox. |
+| 1 | Rail crossing node with no connected road | OSM node `2163420596`, no road edge attached in this extract. |
+| 1 | Incomplete roundabout | Part of a roundabout's edge set (`608526512#0`) lies outside the bbox. |
 
-### Specific known limitation: the one mapped turn restriction is lost
+### The one mapped turn restriction: confirmed not applicable here
 
-`docs/methodology/corridor-osm-extraction.md` already flagged that the
-extract contains only one `type=restriction` relation
-(`no_left_turn`, relation `14151685`). During conversion, its two member
-ways (`727379371`, `1061207468`) turned out **not** to be present in the
-raw extract at all — they lie outside the study bounding box, even though
-the restriction's `via` node is inside it. `netconvert` correctly dropped
-the restriction rather than guessing. This means the generated network
-currently has **zero enforced turn restrictions**, which does not match
-reality and will need to be re-added manually (or via a wider re-extraction)
-during network cleaning.
+The single `type=restriction` relation referencing this extract
+(`no_left_turn`, relation `14151685`) was investigated directly against
+the OSM API: its via-node's real coordinates place it **~1.5 km outside**
+this study area's boundary. It is not a restriction on this corridor at
+all — it only appeared in the raw extract because OSM's `map` endpoint
+includes every node referenced by a way touching the bbox, however far
+away that node actually is. **No turn restriction exists in this network's
+study area**, and none was fabricated to fill the gap. Full investigation
+in [`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md) §4.
 
 ## Pre-demand connectivity inspection
 
@@ -163,39 +184,45 @@ Before generating any traffic demand, the network was checked for fatal,
 simulation-blocking connectivity problems (not just the local geometry
 warnings above):
 
-- **Whole-network connectivity**: restricting to the 576 edges that allow
-  `passenger` vehicles, a weakly-connected-component analysis (via
-  `sumolib`) found **exactly one component containing all 576 edges** — no
-  disconnected islands in the drivable network.
+- **Whole-network connectivity**: restricting to passenger-allowed edges,
+  a weakly-connected-component analysis (via `sumolib`) found **exactly
+  one component** containing every passenger edge (576 before cleaning,
+  567 after — see note below) — no disconnected islands in the drivable
+  network, before or after cleaning.
 - **Corridor routability**: using `sumolib`'s shortest-path search on the
-  actual directed network (i.e. respecting one-way streets), a route exists
-  in **both directions** between the edges nearest the two study endpoints:
-  - Mvog-Mbi → Poste Centrale: 30 edges, 1,463 m
-  - Poste Centrale → Mvog-Mbi: 28 edges, 1,416 m
+  actual directed network (i.e. respecting one-way streets), a route
+  exists in **both directions** between the edges nearest the two study
+  endpoints, both before and after cleaning:
+  - Before cleaning: Mvog-Mbi → Poste Centrale 30 edges/1,463 m; Poste
+    Centrale → Mvog-Mbi 28 edges/1,416 m.
+  - After cleaning: Mvog-Mbi → Poste Centrale 24 edges/1,220 m; Poste
+    Centrale → Mvog-Mbi 19 edges/1,066 m (shorter — fewer redundant
+    micro-edges after junction merging, not a shortcut or data change).
 - **Engine load test** (see above): `sumo` itself loads the network without
-  error.
+  error, both before and after cleaning.
 
-No fatal issues were found. The network is connected and routable enough
-to support demand generation; the items in the warnings table above remain
-open for later network cleaning but did not block this step.
+No fatal issues were found, in either version. The network is connected
+and routable enough to support demand generation.
 
-## What this conversion deliberately does not include
+## What this network still does not include
 
-- No calibrated lane counts or speed limits — untagged ways use SUMO's
-  generic per-class typemap defaults, not measured or Yaoundé-specific
-  values.
+- No **observed** or measured lane counts or speed limits anywhere — see
+  [`../../docs/methodology/network-cleaning.md`](../../docs/methodology/network-cleaning.md)
+  for the full OBSERVED / OSM-DERIVED / ASSUMED / MODEL-DEFAULT breakdown
+  of every value now in the network.
 - No traffic-signal timing — no junction in this network currently has
-  signal control.
+  signal control, and none is invented.
 - No scenarios or interventions.
-- No validation against observed traffic.
+- No calibration or validation against observed traffic.
 
 ## Next step
 
-Traffic demand now exists as a **synthetic technical smoke test** — see
+Traffic demand exists as a **synthetic technical smoke test** — see
 [`../routes/README.md`](../routes/README.md) and
 [`../configs/README.md`](../configs/README.md). It is explicitly not
-calibrated or observed data. The network-cleaning items above (lane
-counts, the lost turn restriction, the sharp-angle/intersecting-left-turn
-warnings) should be reviewed before any calibration work — see
-[`../../docs/PROJECT_STATUS.md`](../../docs/PROJECT_STATUS.md) for the
-up-to-date TODO ordering.
+calibrated or observed data. A first network-cleaning pass is done (see
+the methodology doc linked above); its unresolved limitations (some
+corridor lane gaps, the provisional speed assumption, two persistent
+geometry warnings, unverified signal control at every major junction) are
+listed there and in
+[`../../docs/PROJECT_STATUS.md`](../../docs/PROJECT_STATUS.md).

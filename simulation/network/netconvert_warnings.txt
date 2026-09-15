@@ -1,3 +1,6 @@
+Input:   data/processed/mvogmbi_postecentrale_corridor_cleaned.osm
+Output:  simulation/network/mvogmbi_postecentrale_corridor.net.xml
+Typemap: /usr/local/lib/python3.11/dist-packages/sumo/data/typemap/osmNetconvert.typ.xml
 pj_obj_create: Cannot find proj.db
 Warning: Discarding unknown compound 'usage.main' in type 'railway.rail|usage.main' (first occurrence for edge '205640375').
 Warning: Discarding unusable type 'waterway.river' (first occurrence for edge '221924752').
@@ -11,12 +14,14 @@ Warning: Ignoring restriction relation '14151685' with unknown from-way.
 Warning: Ignoring restriction relation '14151685' with unknown to-way.
 Warning: Reducing junction cluster 1986784005,418721753,6816651864 (parallel incoming -35819874#0,740596758).
 Warning: Not joining junctions 1986784005,418721753,6816651864 (after reduction).
+Warning: Reducing junction cluster 2067684857,2357191025,6684083147 (parallel incoming -198827377#0,-226984126).
+Warning: Not joining junctions 2089343122,5845788801 (parallel incoming -206093864,-618476413).
+Warning: Reducing junction cluster 2089343216,2194461408,2194461425,5806844140 (parallel incoming -679441319#2,198851056#3).
 Warning: Not joining junctions 2090526359,5804589964 (parallel incoming -198985975,198986032#1).
 Warning: Not joining junctions 2365589338,418782769 (parallel incoming -1061295729#2,-199028565).
 Warning: Reducing junction cluster 2449160775,2491120026,331136286 (parallel outgoing 236956785#0,97257140#0).
 Warning: Not joining junctions 2449160780,5814704583 (parallel incoming 236956785#0,97257140#0).
-Warning: Not joining junctions 331136281,454902439 (long edge).
-Warning: Reducing junction cluster 4643048687,6641240534,6641240537,6641240541,6801485403,6894408021 (parallel incoming -736398871,736398872#0).
+Warning: Reducing junction cluster 4643048687,6641240534,6641240537,6641240541,6801485403,6894408020,6894408021 (parallel incoming -736398871,736398872#0).
 pj_obj_create: Cannot find proj.db
 Warning: Found angle of 105.39 degrees at edge '-1486879770#0', segment 1.
 Warning: Found angle of 107.11 degrees at edge '-205640379', segment 9.
@@ -26,16 +31,16 @@ Warning: Found angle of 107.11 degrees at edge '205640379', segment 18.
 Warning: Found angle of 108.53 degrees at edge '287111949#0', segment 7.
 Warning: Found sharp turn with radius 5.54 at the start of edge '356194666'.
 Warning: The rail crossing '2163420596' does not have any roads.
-Warning: Speed of straight connection '-613759316#6_0->-613759316#5_0' reduced by 7.94 due to turning radius of 37.05 (length=14.42, angle=37.78).
-Warning: Speed of straight connection '613759316#3_0->613759316#4_0' reduced by 5.71 due to turning radius of 49.59 (length=15.45, angle=33.15).
-Warning: Speed of straight connection '-707330744_0->740125070#2_0' reduced by 6.47 due to turning radius of 24.41 (length=11.67, angle=43.31).
-Warning: Speed of straight connection '-740125070#2_0->707330744_0' reduced by 7.67 due to turning radius of 19.61 (length=9.29, angle=43.31).
-Warning: Speed of straight connection '713182026_0->1061295729#0_0' reduced by 17.18 due to turning radius of 20.41 (length=6.00, angle=32.54).
-Warning: Intersecting left turns at junction 'cluster_1986774603_4642971863' from lane '989796509_0' and lane '686063049_0' (increase junction radius to avoid this).
-Warning: Intersecting left turns at junction 'cluster_2067684857_6684083147' from lane '226984100_0' and lane '-198827377#0_0' (increase junction radius to avoid this).
+Warning: Speed of straight connection '-198827379#1_0->-198827379#0_0' reduced by 6.56 due to turning radius of 44.59 (length=22.34, angle=44.23).
+Warning: Speed of straight connection '198827379#0_0->198827379#1_0' reduced by 6.13 due to turning radius of 47.10 (length=23.62, angle=44.23).
+Warning: Speed of straight connection '-682805745#2_0->-682805745#1_0' reduced by 14.15 due to turning radius of 33.76 (length=9.47, angle=31.46).
+Warning: Speed of straight connection '682805745#1_0->682805745#2_0' reduced by 12.98 due to turning radius of 39.81 (length=11.21, angle=31.46).
+Warning: Speed of straight connection '615220834#0_1->615220834#1_1' reduced by 5.52 due to turning radius of 90.07 (length=17.77, angle=26.40).
+Warning: Intersecting left turns at junction 'cluster_2292624027_2507835140' from lane '220139510#0_0' and lane '-220139510#2_0' (increase junction radius to avoid this).
 Warning: Intersecting left turns at junction 'cluster_4642971881_4642971884' from lane '615241214#0_0' and lane '-614717138#0_0' (increase junction radius to avoid this).
 Warning: Intersecting left turns at junction 'cluster_6641240534_6641240537_6641240541' from lane '736398872#0_1' and lane '713516967#0_0' (increase junction radius to avoid this).
 Warning: Writing incomplete roundabout. Edges: '608526512#0' no longer exist'
-Warning: 7 total messages of type: Not joining junctions % (%).
-Warning: 24 total messages of type: Speed of % connection '%' reduced by % due to turning radius of % (length=%, angle=%).
+Warning: 10 total messages of type: Not joining junctions % (%).
+Warning: 8 total messages of type: Speed of % connection '%' reduced by % due to turning radius of % (length=%, angle=%).
 Success.
+Done.
