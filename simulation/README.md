@@ -41,19 +41,34 @@ The current development priority is to get a single successful baseline simulati
    turn restriction, no signal timing) are documented in
    [`network/README.md`](network/README.md). Network cleaning/calibration
    against these gaps has not been done yet.
-3. **Vehicles / traffic demand** — Not started.
-4. **Successful baseline simulation** — Not started.
+3. **Vehicles / traffic demand** — **Done (synthetic/provisional only).**
+   [`routes/synthetic_smoke_test.rou.xml`](routes/synthetic_smoke_test.rou.xml)
+   holds 258 randomly generated trips — see
+   [`routes/README.md`](routes/README.md) for why this is explicitly not
+   real or calibrated demand.
+4. **Successful baseline simulation** — **Done, as a technical smoke test.**
+   [`configs/baseline_smoke_test.sumocfg`](configs/baseline_smoke_test.sumocfg)
+   runs the network + synthetic demand end to end: 258/258 vehicles
+   inserted, 237 completed their routes within the 1,800s window, 0
+   collisions, 0 teleports. See
+   [`configs/README.md`](configs/README.md). This confirms the pipeline
+   works technically — it is **not** a validated or calibrated traffic
+   model.
 
-Only after this baseline exists and is working does scenario comparison (varying lanes, signal timing, road condition, closures, demand, etc.) and analytics build on top of it.
+Only after a *calibrated and validated* baseline exists does scenario comparison (varying lanes, signal timing, road condition, closures, demand, etc.) and analytics build on top of it.
 
 ## Status
 
-- `network/` now contains a structurally valid SUMO network generated from
-  the real OSM extract (see [`network/README.md`](network/README.md) for
-  full detail). `routes/`, `scenarios/`, `configs/` are still empty — no
-  `.rou.xml` or `.sumocfg` files exist yet, and no traffic demand has been
-  defined.
-- SUMO (`eclipse-sumo` 1.27.1, via `pip install eclipse-sumo`) is installed
-  in the current development environment.
-- The network has **not** been calibrated or validated against observed
-  traffic, and has no signal timing or turn restrictions applied yet.
+- `network/` contains a structurally valid SUMO network generated from the
+  real OSM extract (see [`network/README.md`](network/README.md), including
+  a pre-demand connectivity check: the full drivable network is one
+  connected component, and the corridor is routable in both directions).
+- `routes/` and `configs/` contain a synthetic-demand baseline smoke test
+  (see [`routes/README.md`](routes/README.md) and
+  [`configs/README.md`](configs/README.md)). `scenarios/` is still empty —
+  scenario work has not started.
+- SUMO (`eclipse-sumo` 1.27.1, via `pip install eclipse-sumo`) and `pyproj`
+  are installed in the current development environment.
+- Nothing in this directory has been calibrated or validated against
+  observed traffic. The network still has no signal timing or turn
+  restrictions applied, and the demand is randomly generated, not real.

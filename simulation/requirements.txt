@@ -1,3 +1,4 @@
-# SUMO tooling used to build/inspect the simulation network.
+# SUMO tooling used to build/inspect/run the simulation network.
 # Install with: pip install -r simulation/requirements.txt
 eclipse-sumo==1.27.1
+pyproj==3.7.2
