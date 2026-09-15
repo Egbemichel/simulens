@@ -27,13 +27,27 @@ The current development priority is to get a single successful baseline simulati
 4. Successful baseline simulation
 ```
 
-1. **Real OSM road network** — A real extract of the study corridor from OpenStreetMap, once its boundary is finalized (see [`../docs/PROJECT_STATUS.md`](../docs/PROJECT_STATUS.md)). Not fabricated.
-2. **SUMO network** — The OSM extract converted into a SUMO network (typically via `netconvert`), then cleaned of import artifacts.
-3. **Vehicles / traffic demand** — A configurable definition of vehicles and routes representing traffic on the corridor.
-4. **Successful baseline simulation** — Running the network and demand together in SUMO to produce a working, inspectable baseline simulation of the corridor.
+1. **Real OSM road network** — **Done.** A real extract of the study corridor
+   boundary now exists at
+   [`../data/raw/osm/mvogmbi_postecentrale_corridor.osm`](../data/raw/osm/mvogmbi_postecentrale_corridor.osm),
+   with its derivation documented in
+   [`../docs/methodology/corridor-osm-extraction.md`](../docs/methodology/corridor-osm-extraction.md).
+2. **SUMO network** — Not started. The OSM extract still needs to be
+   converted into a SUMO network (via `netconvert`, e.g.
+   `netconvert --osm-files data/raw/osm/mvogmbi_postecentrale_corridor.osm -o simulation/network/corridor.net.xml`),
+   then cleaned of import artifacts. The extraction methodology doc already
+   flags known gaps (sparse `lanes`/`maxspeed` tagging, near-absent traffic
+   signal/turn-restriction data) that this step will need to address.
+3. **Vehicles / traffic demand** — Not started.
+4. **Successful baseline simulation** — Not started.
 
 Only after this baseline exists and is working does scenario comparison (varying lanes, signal timing, road condition, closures, demand, etc.) and analytics build on top of it.
 
 ## Status
 
-No network, route, scenario, or config files exist yet. This directory is currently structural only, pending the OSM data acquisition described in `data/README.md` and `docs/PROJECT_STATUS.md`.
+- `network/`, `routes/`, `scenarios/`, `configs/` are still empty — no
+  `.net.xml`, `.rou.xml`, or `.sumocfg` files exist yet, and no SUMO
+  conversion has been run (SUMO/`netconvert` is not yet installed in the
+  current development environment).
+- The real OSM source data these will be built from now exists (see above).
+  It has **not** been validated against observed traffic.
